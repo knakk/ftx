@@ -68,6 +68,9 @@ func (i *MapIndex) Query(q *Query) *SearchResults {
 			} else {
 				and = and.Intersect(i.index[t])
 			}
+		} else {
+			and = intset.New()
+			break
 		}
 	}
 
@@ -78,6 +81,9 @@ func (i *MapIndex) Query(q *Query) *SearchResults {
 			} else {
 				not = not.Intersect(i.index[t])
 			}
+		} else {
+			not = intset.New()
+			break
 		}
 	}
 

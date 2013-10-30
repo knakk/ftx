@@ -61,4 +61,9 @@ func TestMapIndexQuery(t *testing.T) {
 	q2 := NewQuery().Should([]string{"æeaåedår", "alle"}).Not([]string{"nonner"})
 	res2 := idx.Query(q2)
 	s.Expect(srAsIntSet(res2).Contains(12, 88, 9), true)
+
+	q3 := NewQuery().Must([]string{"belgskveppe", "all"})
+	res3 := idx.Query(q3)
+	s.Expect(res3.Count, 0)
+	//s.Expect(res3.Hits[0], "hva?")
 }
