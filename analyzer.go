@@ -17,7 +17,7 @@ type Analyzer struct {
 
 // Index indexes a given document using the character filters, tokenizer and
 // token filters in the analyzer.
-func (a Analyzer) Index(doc string, id int) {
+func (a *Analyzer) Index(doc string, id int) {
 	for _, f := range a.charFilters {
 		doc = f.Filter(doc)
 	}
@@ -26,6 +26,18 @@ func (a Analyzer) Index(doc string, id int) {
 		tokens = t.Filter(tokens)
 	}
 	a.Idx.Add(id, tokens)
+}
+
+// Unindex remove doc occurences of tokens from the index
+func (a *Analyzer) UnIndex(doc string, id int) {
+	for _, f := range a.charFilters {
+		doc = f.Filter(doc)
+	}
+	tokens := a.tokenizer.Tokenize(doc)
+	for _, t := range a.tokenFilters {
+		tokens = t.Filter(tokens)
+	}
+	a.Idx.Remove(id, tokens)
 }
 
 func NewStandardAnalyzer() *Analyzer {

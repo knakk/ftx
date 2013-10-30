@@ -27,6 +27,10 @@ func TestStandardAnalyzer(t *testing.T) {
 	q := index.NewQuery().Must([]string{"meg"})
 	res := a.Idx.Query(q)
 	s.Expect(srAsIntSet(res).Contains(1, 3), true)
+
+	a.UnIndex("Kan du finne Meg?", 1)
+	res2 := a.Idx.Query(q)
+	s.Expect(srAsIntSet(res2).Contains(1), false)
 }
 
 func TestNGramAnalyzer(t *testing.T) {
