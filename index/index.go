@@ -6,7 +6,7 @@ type Index interface {
 	Add(doc int, tokens []string)
 	Remove(doc int, tokens []string)
 	CanRank() bool
-	Query(q Query) *SearchResults
+	Query(q *Query) *SearchResults
 	Size() int // how many tokens are indexed
 }
 
