@@ -12,7 +12,7 @@ type Analyzer struct {
 	charFilters  []char.Filter
 	tokenizer    Tokenizer
 	tokenFilters []token.Filter
-	index        index.Index
+	Idx          index.Index
 }
 
 // Index indexes a given document using the character filters, tokenizer and
@@ -25,7 +25,7 @@ func (a Analyzer) Index(doc string, id int) {
 	for _, t := range a.tokenFilters {
 		tokens = t.Filter(tokens)
 	}
-	a.index.Add(id, tokens)
+	a.Idx.Add(id, tokens)
 }
 
 func NewStandardAnalyzer() *Analyzer {
@@ -35,7 +35,7 @@ func NewStandardAnalyzer() *Analyzer {
 			char.NewNorwegianFoldingFilter()},
 		tokenizer:    NewWhiteSpaceTokenizer(),
 		tokenFilters: []token.Filter{token.NewLowerCaseFilter()},
-		index:        index.NewMapIndex(),
+		Idx:          index.NewMapIndex(),
 	}
 }
 
@@ -46,6 +46,6 @@ func NewNGramAnalyzer(min, max int) *Analyzer {
 			char.NewNorwegianFoldingFilter()},
 		tokenizer:    NewNGramTokenizer(min, max),
 		tokenFilters: []token.Filter{token.NewLowerCaseFilter()},
-		index:        index.NewMapIndex(),
+		Idx:          index.NewMapIndex(),
 	}
 }

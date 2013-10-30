@@ -25,7 +25,7 @@ func TestStandardAnalyzer(t *testing.T) {
 	a.Index("han hun du meg deg", 3)
 
 	q := index.NewQuery().Must([]string{"meg"})
-	res := a.index.Query(q)
+	res := a.Idx.Query(q)
 	s.Expect(srAsIntSet(res).Contains(1, 3), true)
 }
 
@@ -39,10 +39,10 @@ func TestNGramAnalyzer(t *testing.T) {
 	a.Index("krapyl", 10)
 
 	q := index.NewQuery().Should([]string{"oks", "kr"})
-	res := a.index.Query(q)
+	res := a.Idx.Query(q)
 	s.Expect(srAsIntSet(res).Contains(2, 4, 8, 10), true)
 
 	q2 := index.NewQuery().Must([]string{"bok"}).Not([]string{"smuler"})
-	res2 := a.index.Query(q2)
+	res2 := a.Idx.Query(q2)
 	s.Expect(srAsIntSet(res2).Equal(intset.NewFromSlice([]int{2})), true)
 }
