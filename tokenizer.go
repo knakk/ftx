@@ -1,11 +1,12 @@
 package ftx
 
 import (
-	"regexp"
+	"bytes"
+	"text/scanner"
 	"unicode/utf8"
 )
 
-var rWhiteSpace = regexp.MustCompile("[\t\n\f\r ]+")
+const whiteSpace = 1<<'\t' | 1<<'\n' | 1<<'\r' | 1<<'\f' | 1<<' '
 
 // Tokenizer interface. A tokenizer takes a string and splits it into a slice
 // of strings (tokens).
@@ -23,7 +24,30 @@ func NewWhiteSpaceTokenizer() *WhiteSpaceTokenizer {
 
 // Tokenize splits a string at whitespaces.
 func (t *WhiteSpaceTokenizer) Tokenize(s string) []string {
-	return rWhiteSpace.Split(s, -1)
+	words := []string{}
+	var sc scanner.Scanner
+	var token bytes.Buffer
+	sc.Init(bytes.NewBufferString(s))
+	sc.Mode = 0
+	sc.Whitespace = 0
+	charCount := 0
+	r := sc.Scan()
+
+	for r != scanner.EOF {
+		if whiteSpace&(1<<uint(r)) != 0 {
+			if charCount != 0 {
+				words = append(words, token.String())
+			}
+			token.Reset()
+			charCount = 0
+		} else {
+			token.WriteRune(r)
+			charCount++
+		}
+		r = sc.Scan()
+	}
+	words = append(words, token.String())
+	return words
 }
 
 // NGramTokenizer tokenize by n-grams
@@ -45,8 +69,29 @@ func NewNGramTokenizer(min, max int) *NGramTokenizer {
 // Tokenize splits a strings into n-grams
 func (t *NGramTokenizer) Tokenize(s string) []string {
 	results := []string{}
-	words := rWhiteSpace.Split(s, -1)
+	words := []string{}
+	var sc scanner.Scanner
+	var token bytes.Buffer
+	sc.Init(bytes.NewBufferString(s))
+	sc.Mode = 0
+	sc.Whitespace = 0
+	charCount := 0
+	r := sc.Scan()
 
+	for r != scanner.EOF {
+		if whiteSpace&(1<<uint(r)) != 0 {
+			if charCount != 0 {
+				words = append(words, token.String())
+			}
+			token.Reset()
+			charCount = 0
+		} else {
+			token.WriteRune(r)
+			charCount++
+		}
+		r = sc.Scan()
+	}
+	words = append(words, token.String())
 	for _, w := range words {
 		blen := len(w)
 		for c := range w {

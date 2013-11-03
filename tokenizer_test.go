@@ -26,7 +26,7 @@ func TestNGramTokenizer(t *testing.T) {
 	s := specs.New(t)
 
 	tokenizer := NewNGramTokenizer(2, 3)
-	str := "FC Schølke 04"
+	str := "FC  Schølke	\n 04"
 	tokens := tokenizer.Tokenize(str)
 	tests := []specs.Spec{
 		{tokens[0], "FC"},
