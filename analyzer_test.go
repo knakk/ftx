@@ -28,6 +28,10 @@ func TestStandardAnalyzer(t *testing.T) {
 	res := a.Idx.Query(q)
 	s.Expect(srAsIntSet(res).Contains(1, 3), true)
 
+	q3 := index.NewQuery().Must([]string{"du", "DÆ", "han"})
+	res3 := a.Idx.Query(q3)
+	s.Expect(res3.Count, 0)
+
 	a.UnIndex("Kan du finne Meg?", 1)
 	res2 := a.Idx.Query(q)
 	s.Expect(srAsIntSet(res2).Contains(1), false)
