@@ -5,8 +5,6 @@ import (
 	"unicode/utf8"
 )
 
-const whiteSpace = 1<<'\t' | 1<<'\n' | 1<<'\r' | 1<<'\f' | 1<<' '
-
 // Tokenizer interface. A tokenizer takes a string and splits it into a slice
 // of strings (tokens).
 type Tokenizer interface {
