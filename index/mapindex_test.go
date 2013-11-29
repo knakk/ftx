@@ -36,8 +36,8 @@ func TestMapIndexRemoveDoc(t *testing.T) {
 	s.Expect(idx.Size(), 3)
 }
 
-func srAsIntSet(sr *SearchResults) intset.IntSet {
-	s := intset.New()
+func srAsIntSet(sr *SearchResults) *intset.SliceSet {
+	s := intset.NewSliceSet(100)
 	for _, h := range sr.Hits {
 		s.Add(h.ID)
 	}

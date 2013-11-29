@@ -9,13 +9,13 @@ import (
 // MapIndex is the simplest index type. It cannot rank, but only records the
 // occourences of tokens in documents.
 type MapIndex struct {
-	index map[string]intset.IntSet
+	index map[string]*intset.HashSet
 	sync.RWMutex
 }
 
 // NewMapIndex returns a new MapIndex.
 func NewMapIndex() *MapIndex {
-	return &MapIndex{index: make(map[string]intset.IntSet)}
+	return &MapIndex{index: make(map[string]*intset.HashSet)}
 }
 
 // CanRank states that MapIndex cannot rank.
@@ -29,7 +29,7 @@ func (i *MapIndex) Add(doc int, tokens []string) {
 	defer i.Unlock()
 	for _, t := range tokens {
 		if _, ok := i.index[t]; !ok {
-			i.index[t] = intset.New()
+			i.index[t] = intset.NewHashSet(999)
 		}
 		i.index[t].Add(doc)
 	}
@@ -57,7 +57,7 @@ func (i *MapIndex) Remove(doc int, tokens []string) {
 // Query the MapIndex for search hits.
 func (i *MapIndex) Query(q *Query) *SearchResults {
 	res := SearchResults{}
-	var and, not, or, setRes intset.IntSet
+	var and, not, or, setRes *intset.HashSet
 
 	i.RLock()
 
@@ -66,10 +66,10 @@ func (i *MapIndex) Query(q *Query) *SearchResults {
 			if and == nil {
 				and = i.index[t].Clone()
 			} else {
-				and = and.Intersect(i.index[t])
+				and = and.Intersection(i.index[t])
 			}
 		} else {
-			and = intset.New()
+			and = intset.NewHashSet(999)
 			break
 		}
 	}
@@ -79,10 +79,10 @@ func (i *MapIndex) Query(q *Query) *SearchResults {
 			if not == nil {
 				not = i.index[t].Clone()
 			} else {
-				not = not.Intersect(i.index[t])
+				not = not.Intersection(i.index[t])
 			}
 		} else {
-			not = intset.New()
+			not = intset.NewHashSet(999)
 			break
 		}
 	}
@@ -98,9 +98,9 @@ func (i *MapIndex) Query(q *Query) *SearchResults {
 				}
 			}
 		}
-		setRes = or.Diff(not)
+		setRes = or.Difference(not)
 	} else {
-		setRes = and.Diff(not)
+		setRes = and.Difference(not)
 	}
 
 	i.RUnlock() // done reading from the index
