@@ -87,6 +87,10 @@ func (i *MapIndex) Query(q *Query) *SearchResults {
 		}
 	}
 
+	if not == nil {
+		not = intset.NewHashSet(999)
+	}
+
 	// Ignore q.ShouldMatch if q.MustMatch has any entries
 	if and == nil {
 		for _, t := range q.ShouldMatch {
