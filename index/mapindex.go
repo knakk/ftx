@@ -94,7 +94,7 @@ func (i *MapIndex) Query(q *Query) *SearchResults {
 				if or == nil {
 					or = i.index[t].Clone()
 				} else {
-					or = or.Union(i.index[t])
+					or = intset.NewHashSet(999).Union(i.index[t])
 				}
 			}
 		}
