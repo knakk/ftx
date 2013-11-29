@@ -105,7 +105,7 @@ func (i *MapIndex) Query(q *Query) *SearchResults {
 
 	i.RUnlock() // done reading from the index
 
-	for i := range setRes {
+	for i := range setRes.All() {
 		res.Hits = append(res.Hits, searchHit{i, 0})
 	}
 
