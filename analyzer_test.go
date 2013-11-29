@@ -8,8 +8,8 @@ import (
 	"github.com/knakk/specs"
 )
 
-func srAsIntSet(sr *index.SearchResults) intset.IntSet {
-	s := intset.New()
+func srAsIntSet(sr *index.SearchResults) *intset.HashSet {
+	s := intset.NewHashSet(100)
 	for _, h := range sr.Hits {
 		s.Add(h.ID)
 	}
@@ -52,5 +52,5 @@ func TestNGramAnalyzer(t *testing.T) {
 
 	q2 := index.NewQuery().Must([]string{"bok"}).Not([]string{"smuler"})
 	res2 := a.Idx.Query(q2)
-	s.Expect(srAsIntSet(res2).Equal(intset.NewFromSlice([]int{2})), true)
+	s.Expect(srAsIntSet(res2).Equal(intset.NewHashSet(10).Add(2)), true)
 }
