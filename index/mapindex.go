@@ -66,10 +66,10 @@ func (i *MapIndex) Query(q *Query) *SearchResults {
 			if and == nil {
 				and = i.index[t].Clone()
 			} else {
-				and = intset.NewHashSet(999).Intersection(i.index[t])
+				and = and.Intersection(i.index[t])
 			}
 		} else {
-			and = intset.NewHashSet(999)
+			and = intset.NewHashSet(10)
 			break
 		}
 	}
@@ -79,16 +79,16 @@ func (i *MapIndex) Query(q *Query) *SearchResults {
 			if not == nil {
 				not = i.index[t].Clone()
 			} else {
-				not = intset.NewHashSet(999).Intersection(i.index[t])
+				not = not.Intersection(i.index[t])
 			}
 		} else {
-			not = intset.NewHashSet(999)
+			not = intset.NewHashSet(10)
 			break
 		}
 	}
 
 	if not == nil {
-		not = intset.NewHashSet(999)
+		not = intset.NewHashSet(10)
 	}
 
 	// Ignore q.ShouldMatch if q.MustMatch has any entries
@@ -98,7 +98,7 @@ func (i *MapIndex) Query(q *Query) *SearchResults {
 				if or == nil {
 					or = i.index[t].Clone()
 				} else {
-					or = intset.NewHashSet(999).Union(i.index[t])
+					or = or.Union(i.index[t])
 				}
 			}
 		}
@@ -109,7 +109,7 @@ func (i *MapIndex) Query(q *Query) *SearchResults {
 
 	i.RUnlock() // done reading from the index
 
-	for i := range setRes.All() {
+	for _, i := range setRes.All() {
 		res.Hits = append(res.Hits, searchHit{i, 0})
 	}
 
