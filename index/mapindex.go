@@ -47,9 +47,11 @@ func (i *MapIndex) Remove(doc int, tokens []string) {
 	i.Lock()
 	defer i.Unlock()
 	for _, t := range tokens {
-		i.index[t].Remove(doc)
-		if i.index[t].Size() == 0 {
-			delete(i.index, t)
+		if _, ok := i.index[t]; ok {
+			i.index[t].Remove(doc)
+			if i.index[t].Size() == 0 {
+				delete(i.index, t)
+			}
 		}
 	}
 }
