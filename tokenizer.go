@@ -2,6 +2,7 @@ package ftx
 
 import (
 	"bytes"
+	"unicode"
 	"unicode/utf8"
 )
 
@@ -46,32 +47,59 @@ func NewNGramTokenizer(min, max int) *NGramTokenizer {
 }
 
 // Tokenize splits a strings into n-grams
-func (t *NGramTokenizer) Tokenize(s string) []string {
+func (t *NGramTokenizer) Tokenize(input string) []string {
 	results := []string{}
-	words := []string{}
-	bwords := bytes.Fields([]byte(s))
-	for _, w := range bwords {
-		words = append(words, string(w))
-	}
-	for _, w := range words {
-		blen := len(w)
-		for c := range w {
-			i := t.Min
-			for c+i <= blen {
-				if !utf8.ValidString(w[c : c+i]) {
-					i++
-					continue
-				}
-				rlen := len([]rune(w[c : c+i]))
-				if rlen > t.Max {
-					break
-				}
-				if rlen >= t.Min {
-					results = append(results, w[c:c+i])
-				}
-				i++
+	start := 0                // start of current word
+	pos := 0                  // position in input string
+	c := 0                    // count of characters in current word
+	w := make([]int, t.Max+1) // keep track of rune widths
+	var r rune
+	var atEnd bool
+	for {
+		if !atEnd {
+			r, w[c] = utf8.DecodeRuneInString(input[pos:])
+			if w[c] == 0 {
+				// reached end of string
+				atEnd = true
+			} else {
+				pos += w[c]
+				c++
 			}
 		}
+		if unicode.IsSpace(r) {
+			// reached word boundary
+			if c >= t.Min {
+				j := 0
+				for i := c - 1; i >= t.Min; i-- {
+					j += w[i]
+					results = append(results, input[start:pos-j])
+				}
+			}
+			// reset
+			start = pos
+			c = 0
+			for i := range w {
+				w[i] = 0
+			}
+			continue
+		}
+		if c == t.Max || atEnd {
+			// reached max gram length or at the end of string
+			j := 0
+			for i := c; i >= t.Min; i-- {
+				j += w[i]
+				results = append(results, input[start:pos-j])
+			}
+			if start+t.Min >= len(input) {
+				break
+			}
+
+			// advance one rune
+			start += w[0]
+			c--
+			copy(w[0:], w[1:])
+		}
+
 	}
 	return results
 }

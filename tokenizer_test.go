@@ -31,9 +31,12 @@ func TestWhiteSpaceTokenizer(t *testing.T) {
 
 func TestNGramTokenizer(t *testing.T) {
 	tokenizer := NewNGramTokenizer(2, 3)
-	str := "FC  Schølke	\n 04"
+	str := " FC \tSchølke\n04"
 	tokens := tokenizer.Tokenize(str)
-	want := []string{"FC", "Sc", "Sch", "ch", "chø", "hø", "høl", "øl", "ølk", "lk", "lke", "ke", "04"}
+	want := []string{"FC", "Sch", "Sc", "chø", "ch", "høl", "hø", "ølk", "øl", "lke", "lk", "ke", "04"}
+	if len(tokens) != len(want) {
+		t.Fatalf("NGramTokenizer.Tokenize(%q) => %#v; want %#v", str, tokens, want)
+	}
 	for i, tok := range tokens {
 		if tok != want[i] {
 			t.Fatalf("NGramTokenizer.Tokenize(%q) => %#v; want %#v", str, tokens, want)
