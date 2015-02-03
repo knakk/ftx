@@ -3,23 +3,16 @@ package token
 import (
 	"strings"
 	"testing"
-
-	"github.com/knakk/specs"
 )
 
 func TestLowerCase(t *testing.T) {
-	s := specs.New(t)
-
-	tokens := strings.Split("Gi MÆ di TÅKENAN", " ")
-
+	input := strings.Split("Gi MÆ di TÅKENAN", " ")
 	f := NewLowerCaseFilter()
-	tokens = f.Filter(tokens)
-
-	tests := []specs.Spec{
-		{"gi", tokens[0]},
-		{"mæ", tokens[1]},
-		{"di", tokens[2]},
-		{"tåkenan", tokens[3]},
+	output := f.Filter(input)
+	want := []string{"gi", "mæ", "di", "tåkenan"}
+	for i, tok := range want {
+		if tok != output[i] {
+			t.Fatalf("LowerCaseFilter(%v) => %v; want %v", input, output, want)
+		}
 	}
-	s.ExpectAll(tests)
 }

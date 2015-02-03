@@ -2,34 +2,36 @@ package char
 
 import (
 	"testing"
-
-	"github.com/knakk/specs"
 )
 
 func TestRemovePunctuationFilter(t *testing.T) {
-	s := specs.New(t)
-
 	charf := NewRemovePunctuationFilter()
-
-	s.Expect(charf.Filter("hei, `du`."), "hei du")
-	s.Expect(charf.Filter("hjælp!! `skrekk-blandet*?=) \"fryd\""),
-		"hjælp skrekkblandet fryd")
+	input := "hei, `du`."
+	want := "hei du"
+	if charf.Filter(input) != want {
+		t.Errorf("RemovePunctuationFilter(%q) => %v; want %v", input, charf.Filter(input), want)
+	}
+	input = "hjælp!! `skrekk-blandet*?=) \"fryd\""
+	want = "hjælp skrekkblandet fryd"
+	if charf.Filter(input) != want {
+		t.Errorf("RemovePunctuationFilter(%q) => %v; want %v", input, charf.Filter(input), want)
+	}
 }
 
 func TestPunct2SpaceFilter(t *testing.T) {
-	s := specs.New(t)
-
 	charf := NewPunct2SpaceFilter()
-
-	s.Expect(charf.Filter("Skrap-balle,kan.du\"fikse\"meg?vennligst~svar."),
-		"Skrap balle kan du fikse meg vennligst svar ")
+	input := "Skrap-balle,kan.du\"fikse\"meg?vennligst~svar."
+	want := "Skrap balle kan du fikse meg vennligst svar "
+	if charf.Filter(input) != want {
+		t.Errorf("Punct2SpaceFilter(%q) => %v; want %v", input, charf.Filter(input), want)
+	}
 }
 
 func TestNewNorwegianFoldingFilter(t *testing.T) {
-	s := specs.New(t)
-
 	charf := NewNorwegianFoldingFilter()
-
-	s.Expect(charf.Filter("éntrö Él ñinjä misćjø bånd"),
-		"entrø El ninjæ miscjø bånd")
+	input := "éntrö Él ñinjä misćjø bånd"
+	want := "entrø El ninjæ miscjø bånd"
+	if charf.Filter(input) != want {
+		t.Errorf("NorwegianFoldingFilter(%q) => %v; want %v", input, charf.Filter(input), want)
+	}
 }

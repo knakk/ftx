@@ -4,36 +4,46 @@ import (
 	"testing"
 
 	"github.com/knakk/intset"
-	"github.com/knakk/specs"
 )
 
 func TestMapIndexAddDoc(t *testing.T) {
-	s := specs.New(t)
-
+	tests := []struct {
+		doc      int
+		tokens   []string
+		wantSize int
+	}{
+		{1, []string{"alle"}, 1},
+		{1, []string{"kan", "ikke", "synge"}, 4},
+		{1, []string{"kan"}, 4},
+		{2, []string{"kan"}, 4},
+	}
 	idx := NewMapIndex()
-	s.Expect(idx.Size(), 0)
-	idx.Add(1, []string{"alle"})
-	s.Expect(idx.Size(), 1)
-	idx.Add(1, []string{"kan", "ikke", "synge"})
-	s.Expect(idx.Size(), 4)
-	idx.Add(1, []string{"kan"})
-	s.Expect(idx.Size(), 4)
-	idx.Add(2, []string{"kan"})
-	s.Expect(idx.Size(), 4)
+	for _, tt := range tests {
+		idx.Add(tt.doc, tt.tokens)
+		if idx.Size() != tt.wantSize {
+			t.Errorf("mapIndex.Size() => %v; want %v", idx.Size(), tt.wantSize)
+		}
+	}
 }
 
 func TestMapIndexRemoveDoc(t *testing.T) {
-	s := specs.New(t)
-
 	idx := NewMapIndex()
 	idx.Add(1, []string{"alle", "kan", "ikke", "synge"})
-	s.Expect(idx.Size(), 4)
-	idx.Add(2, []string{"kan"})
-	s.Expect(idx.Size(), 4)
+	if idx.Size() != 4 {
+		t.Errorf("idx.Size() => %d; want 4", idx.Size())
+	}
+	if idx.Size() != 4 {
+		t.Errorf("idx.Size() => %d; want 4", idx.Size())
+	}
 	idx.Remove(2, []string{"ikke"})
-	s.Expect(idx.Size(), 4)
+	if idx.Size() != 4 {
+		t.Errorf("idx.Size() => %d; want 4", idx.Size())
+	}
 	idx.Remove(1, []string{"ikke"})
-	s.Expect(idx.Size(), 3)
+	if idx.Size() != 3 {
+		t.Errorf("idx.Size() => %d; want 3", idx.Size())
+	}
+
 }
 
 func srAsIntSet(sr *SearchResults) *intset.SliceSet {
@@ -45,8 +55,6 @@ func srAsIntSet(sr *SearchResults) *intset.SliceSet {
 }
 
 func TestMapIndexQuery(t *testing.T) {
-	s := specs.New(t)
-
 	idx := NewMapIndex()
 	idx.Add(1, []string{"alle", "nonner", "drar", "skjønt"})
 	idx.Add(12, []string{"skjønt", "alle", "må", "noe"})
@@ -55,15 +63,23 @@ func TestMapIndexQuery(t *testing.T) {
 
 	q := NewQuery().Must([]string{"alle", "skjønt"}).Not([]string{"kan"})
 	res := idx.Query(q)
-	s.Expect(res.Count, 2)
-	s.Expect(srAsIntSet(res).Contains(1, 12), true)
+	if res.Count != 2 {
+		t.Errorf("expected 2 results, got %d", res.Count)
+	}
+	if !srAsIntSet(res).Contains(1, 12) {
+		t.Errorf("got %v; expected (1,12)", res)
+	}
 
 	q2 := NewQuery().Should([]string{"æeaåedår", "alle"}).Not([]string{"nonner"})
 	res2 := idx.Query(q2)
-	s.Expect(srAsIntSet(res2).Contains(12, 88, 9), true)
+	if !srAsIntSet(res2).Contains(12, 88, 9) {
+		t.Errorf("got %v; expected (12,88,9)", res2)
+	}
 
 	q3 := NewQuery().Must([]string{"belgskveppe", "all"})
 	res3 := idx.Query(q3)
-	s.Expect(res3.Count, 0)
+	if res3.Count != 0 {
+		t.Errorf("got %v, want no results", res3)
+	}
 	//s.Expect(res3.Hits[0], "hva?")
 }

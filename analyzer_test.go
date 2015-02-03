@@ -5,7 +5,6 @@ import (
 
 	"github.com/knakk/ftx/index"
 	"github.com/knakk/intset"
-	"github.com/knakk/specs"
 )
 
 func srAsIntSet(sr *index.SearchResults) *intset.HashSet {
@@ -17,7 +16,6 @@ func srAsIntSet(sr *index.SearchResults) *intset.HashSet {
 }
 
 func TestStandardAnalyzer(t *testing.T) {
-	s := specs.New(t)
 	a := NewStandardAnalyzer()
 
 	a.Index("Kan du finne Meg?", 1)
@@ -26,19 +24,24 @@ func TestStandardAnalyzer(t *testing.T) {
 
 	q := index.NewQuery().Must([]string{"meg"})
 	res := a.Idx.Query(q)
-	s.Expect(srAsIntSet(res).Contains(1, 3), true)
+	if !srAsIntSet(res).Contains(1, 3) {
+		t.Fatal("documents not indexed/not queryable")
+	}
 
 	q3 := index.NewQuery().Must([]string{"du", "DÆ", "han"})
 	res3 := a.Idx.Query(q3)
-	s.Expect(res3.Count, 0)
+	if res3.Count != 0 {
+		t.Errorf("expected no results, got %v", res3)
+	}
 
 	a.UnIndex("Kan du finne Meg?", 1)
 	res2 := a.Idx.Query(q)
-	s.Expect(srAsIntSet(res2).Contains(1), false)
+	if srAsIntSet(res2).Contains(1) {
+		t.Error("UnIndex didn't remove document")
+	}
 }
 
 func TestNGramAnalyzer(t *testing.T) {
-	s := specs.New(t)
 	a := NewNGramAnalyzer(2, 10)
 
 	a.Index("Bokstavlig talt!", 2)
@@ -48,9 +51,13 @@ func TestNGramAnalyzer(t *testing.T) {
 
 	q := index.NewQuery().Should([]string{"oks", "kr"})
 	res := a.Idx.Query(q)
-	s.Expect(srAsIntSet(res).Contains(2, 4, 8, 10), true)
+	if !srAsIntSet(res).Contains(2, 4, 8, 10) {
+		t.Fatal("documents not indexed/not queryable")
+	}
 
 	q2 := index.NewQuery().Must([]string{"bok"}).Not([]string{"smuler"})
 	res2 := a.Idx.Query(q2)
-	s.Expect(srAsIntSet(res2).Equal(intset.NewHashSet(10).Add(2)), true)
+	if !srAsIntSet(res2).Equal(intset.NewHashSet(10).Add(2)) {
+		t.Error("ngramanalyzer: must+not query fails")
+	}
 }
